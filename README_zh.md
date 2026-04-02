@@ -60,6 +60,27 @@ cpm close work     # 关闭该实例
 
 主 Claude 应用保持当前 profile 不变。每个 `cpm open` 的实例都有独立窗口，MCP 配置和应用设置会自动从主应用同步。
 
+### 5. 查询所有账户的用量
+
+```bash
+cpm usage
+```
+
+显示每个 profile 下所有组织的速率限制使用情况和重置时间：
+
+```
+── personal ──
+  Organization: alice@example.com's Organization (default_claude_ai)
+    5-hour:           0.0%
+    7-day:            0.0%
+
+── work * ──
+  Organization: Acme Inc. (default_raven)
+    5-hour:         120.0%  resets 04-03 18:30 (2h15m)
+    7-day:           45.0%  resets 04-09 18:00 (145h15m)
+    7-day Sonnet:     0.0%  resets 04-09 18:00 (145h15m)
+```
+
 ### 命令一览
 
 | 命令 | 别名 | 说明 |
@@ -73,6 +94,7 @@ cpm close work     # 关闭该实例
 | `cpm current` | | 显示当前 profile 名称 |
 | `cpm rename <old> <new>` | | 重命名 profile |
 | `cpm remove <name>` | `cpm rm` | 删除 profile |
+| `cpm usage` | | 查询所有账户的速率限制用量和重置时间 |
 
 ### 选项
 

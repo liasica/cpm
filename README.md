@@ -60,6 +60,27 @@ cpm close work     # close that instance
 
 The main Claude app keeps running as your current profile. Each `cpm open` instance gets its own window with MCP config and app settings synced from the main app automatically.
 
+### 5. Check usage across all accounts
+
+```bash
+cpm usage
+```
+
+Displays rate-limit utilization and reset times for every organization in each profile:
+
+```
+── personal ──
+  Organization: alice@example.com's Organization (default_claude_ai)
+    5-hour:           0.0%
+    7-day:            0.0%
+
+── work * ──
+  Organization: Acme Inc. (default_raven)
+    5-hour:         120.0%  resets 04-03 18:30 (2h15m)
+    7-day:           45.0%  resets 04-09 18:00 (145h15m)
+    7-day Sonnet:     0.0%  resets 04-09 18:00 (145h15m)
+```
+
 ### Commands
 
 | Command | Alias | Description |
@@ -73,6 +94,7 @@ The main Claude app keeps running as your current profile. Each `cpm open` insta
 | `cpm current` | | Print current profile name |
 | `cpm rename <old> <new>` | | Rename a profile |
 | `cpm remove <name>` | `cpm rm` | Delete a profile |
+| `cpm usage` | | Show rate-limit usage and reset times for all accounts |
 
 ### Flags
 

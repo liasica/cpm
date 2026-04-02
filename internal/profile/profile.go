@@ -64,6 +64,16 @@ func (m *Manager) profileDir(name string) string {
 	return filepath.Join(m.baseDir, "profiles", name)
 }
 
+// BaseDir 返回 cpm 配置根目录
+func (m *Manager) BaseDir() string {
+	return m.baseDir
+}
+
+// ProfileDir 返回指定 profile 的存储目录
+func (m *Manager) ProfileDir(name string) string {
+	return m.profileDir(name)
+}
+
 // Current 返回当前 profile 名称
 func (m *Manager) Current() string {
 	return m.state.Current
