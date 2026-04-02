@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 
 	"github.com/liasica/cpm/internal/claude"
@@ -25,12 +26,10 @@ type Manager struct {
 
 // NewManager 初始化并返回 Manager
 func NewManager() (*Manager, error) {
-	home, err := os.UserHomeDir()
+	baseDir, err := configDir()
 	if err != nil {
-		return nil, fmt.Errorf("获取用户目录失败: %w", err)
+		return nil, err
 	}
-
-	baseDir := filepath.Join(home, ".config", "cpm")
 	if err = os.MkdirAll(filepath.Join(baseDir, "profiles"), 0755); err != nil {
 		return nil, fmt.Errorf("创建配置目录失败: %w", err)
 	}
@@ -326,4 +325,22 @@ func copyDir(src, dst string) error {
 	}
 
 	return nil
+}
+
+// configDir 返回 cpm 配置目录（跨平台）
+func configDir() (string, error) {
+	// Windows 使用 %APPDATA%\cpm
+	if runtime.GOOS == "windows" {
+		if appData := os.Getenv("APPDATA"); appData != "" {
+			return filepath.Join(appData, "cpm"), nil
+		}
+	}
+
+	// macOS / Linux 使用 ~/.config/cpm
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get user home dir: %w", err)
+	}
+
+	return filepath.Join(home, ".config", "cpm"), nil
 }
