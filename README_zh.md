@@ -2,15 +2,25 @@
 
 [English](README.md)
 
-快速切换 Claude macOS 桌面应用的多账户登录，同时保持 Claude Code 会话、MCP 配置等数据共享。支持多账户同时在线。
+快速切换 Claude 桌面应用的多账户登录，同时保持 Claude Code 会话、MCP 配置等数据共享。支持多账户同时在线。
+
+支持 **macOS**、**Linux** 和 **Windows**。
 
 ## 安装
 
+**一键安装**（macOS / Linux）：
+
 ```bash
-go install .
+curl -fsSL https://raw.githubusercontent.com/liasica/cpm/master/install.sh | sh
 ```
 
-需要 `$GOPATH/bin`（默认 `~/go/bin`）在 `$PATH` 中。
+**从源码安装**（需要 Go）：
+
+```bash
+go install github.com/liasica/cpm/cmd/cpm@latest
+```
+
+**手动下载**：从 [Releases](https://github.com/liasica/cpm/releases) 页面下载对应平台的二进制文件。
 
 ## 使用流程
 

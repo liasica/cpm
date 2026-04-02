@@ -2,15 +2,25 @@
 
 [中文文档](README_zh.md)
 
-Quickly switch between multiple Claude accounts on the macOS desktop app while keeping Claude Code sessions, MCP configs, and other settings shared across all profiles. Also supports running multiple accounts simultaneously.
+Quickly switch between multiple Claude accounts on the desktop app while keeping Claude Code sessions, MCP configs, and other settings shared across all profiles. Also supports running multiple accounts simultaneously.
+
+Supports **macOS**, **Linux**, and **Windows**.
 
 ## Install
 
+**One-line install** (macOS / Linux):
+
 ```bash
-go install .
+curl -fsSL https://raw.githubusercontent.com/liasica/cpm/master/install.sh | sh
 ```
 
-Requires `$GOPATH/bin` (default `~/go/bin`) in your `$PATH`.
+**From source** (requires Go):
+
+```bash
+go install github.com/liasica/cpm/cmd/cpm@latest
+```
+
+**Manual download**: grab the binary from the [Releases](https://github.com/liasica/cpm/releases) page.
 
 ## Usage
 
