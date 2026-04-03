@@ -191,10 +191,13 @@ func printWindow(name string, w *usageWindow) {
 		t, err := time.Parse(time.RFC3339, *w.ResetsAt)
 		if err == nil {
 			remaining := time.Until(t)
+			dim := "\033[2m"
 			if remaining > 0 {
-				fmt.Printf("  resets %s (%s)", t.Local().Format("01-02 15:04"), formatDuration(remaining))
+				local := t.Local()
+				zone, _ := local.Zone()
+				fmt.Printf("  ⏳ %s %s(%s %s)%s", formatDuration(remaining), dim, local.Format("01/02 15:04"), zone, reset)
 			} else {
-				fmt.Print("  (reset)")
+				fmt.Printf("  ✅ %sready%s", "\033[32m", reset)
 			}
 		}
 	}
@@ -204,14 +207,18 @@ func printWindow(name string, w *usageWindow) {
 
 func formatDuration(d time.Duration) string {
 	if d < 0 {
-		return "expired"
+		return "0m"
 	}
 
-	hours := int(d.Hours())
+	days := int(d.Hours()) / 24
+	hours := int(d.Hours()) % 24
 	minutes := int(d.Minutes()) % 60
 
+	if days > 0 {
+		return fmt.Sprintf("%dd %dh %dm", days, hours, minutes)
+	}
 	if hours > 0 {
-		return fmt.Sprintf("%dh%dm", hours, minutes)
+		return fmt.Sprintf("%dh %dm", hours, minutes)
 	}
 
 	return fmt.Sprintf("%dm", minutes)
