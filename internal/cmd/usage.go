@@ -11,6 +11,7 @@ import (
 
 	"github.com/liasica/cpm/internal/claude"
 	"github.com/liasica/cpm/internal/cookie"
+	"github.com/liasica/cpm/internal/i18n"
 	"github.com/liasica/cpm/internal/profile"
 	"github.com/spf13/cobra"
 )
@@ -48,7 +49,7 @@ type extraUsage struct {
 
 var usageCmd = &cobra.Command{
 	Use:   "usage",
-	Short: "查询所有账户的用量和重置时间",
+	Short: i18n.T("Show rate-limit usage and reset times for all accounts", "查询所有账户的用量和重置时间"),
 	Run: func(cmd *cobra.Command, args []string) {
 		pm, err := profile.NewManager()
 		if err != nil {

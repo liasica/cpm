@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	"github.com/liasica/cpm/internal/claude"
+	"github.com/liasica/cpm/internal/i18n"
 )
 
 // State 持久化当前活跃的 profile 信息
@@ -31,7 +32,7 @@ func NewManager() (*Manager, error) {
 		return nil, err
 	}
 	if err = os.MkdirAll(filepath.Join(baseDir, "profiles"), 0755); err != nil {
-		return nil, fmt.Errorf("创建配置目录失败: %w", err)
+		return nil, fmt.Errorf(i18n.T("failed to create config directory: %w", "创建配置目录失败: %w"), err)
 	}
 
 	m := &Manager{
@@ -109,7 +110,7 @@ func (m *Manager) List() ([]string, error) {
 // Add 将当前 Claude 的认证数据保存为指定 profile
 func (m *Manager) Add(name string) error {
 	if m.Exists(name) {
-		return fmt.Errorf("profile [%s] 已存在", name)
+		return fmt.Errorf(i18n.T("profile [%s] already exists", "profile [%s] 已存在"), name)
 	}
 
 	claudeDir, err := claude.DataDir()
@@ -119,7 +120,7 @@ func (m *Manager) Add(name string) error {
 
 	profDir := m.profileDir(name)
 	if err = os.MkdirAll(profDir, 0755); err != nil {
-		return fmt.Errorf("创建 profile 目录失败: %w", err)
+		return fmt.Errorf(i18n.T("failed to create profile directory: %w", "创建 profile 目录失败: %w"), err)
 	}
 
 	for _, entry := range claude.AuthEntries() {
@@ -130,7 +131,7 @@ func (m *Manager) Add(name string) error {
 				continue
 			}
 			_ = os.RemoveAll(profDir)
-			return fmt.Errorf("复制 %s 失败: %w", entry, err)
+			return fmt.Errorf(i18n.T("failed to copy %s: %w", "复制 %s 失败: %w"), entry, err)
 		}
 	}
 
@@ -142,11 +143,11 @@ func (m *Manager) Add(name string) error {
 // Switch 切换到指定 profile
 func (m *Manager) Switch(name string) error {
 	if !m.Exists(name) {
-		return fmt.Errorf("profile [%s] 不存在", name)
+		return fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), name)
 	}
 
 	if m.state.Current == name {
-		return fmt.Errorf("当前已是 profile [%s]", name)
+		return fmt.Errorf(i18n.T("already on profile [%s]", "当前已是 profile [%s]"), name)
 	}
 
 	claudeDir, err := claude.DataDir()
@@ -176,7 +177,7 @@ func (m *Manager) Switch(name string) error {
 			if os.IsNotExist(err) {
 				continue
 			}
-			return fmt.Errorf("恢复 %s 失败: %w", entry, err)
+			return fmt.Errorf(i18n.T("failed to restore %s: %w", "恢复 %s 失败: %w"), entry, err)
 		}
 	}
 
@@ -188,7 +189,7 @@ func (m *Manager) Switch(name string) error {
 // Remove 删除指定 profile
 func (m *Manager) Remove(name string) error {
 	if !m.Exists(name) {
-		return fmt.Errorf("profile [%s] 不存在", name)
+		return fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), name)
 	}
 
 	if m.state.Current == name {
@@ -202,15 +203,15 @@ func (m *Manager) Remove(name string) error {
 // Rename 重命名 profile
 func (m *Manager) Rename(oldName, newName string) error {
 	if !m.Exists(oldName) {
-		return fmt.Errorf("profile [%s] 不存在", oldName)
+		return fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), oldName)
 	}
 
 	if m.Exists(newName) {
-		return fmt.Errorf("profile [%s] 已存在", newName)
+		return fmt.Errorf(i18n.T("profile [%s] already exists", "profile [%s] 已存在"), newName)
 	}
 
 	if err := os.Rename(m.profileDir(oldName), m.profileDir(newName)); err != nil {
-		return fmt.Errorf("重命名失败: %w", err)
+		return fmt.Errorf(i18n.T("rename failed: %w", "重命名失败: %w"), err)
 	}
 
 	if m.state.Current == oldName {
@@ -229,13 +230,13 @@ func (m *Manager) InstanceDir(name string) string {
 // PrepareInstance 为指定 profile 准备独立实例目录（复制认证文件 + 同步共享配置）
 func (m *Manager) PrepareInstance(name string) (string, error) {
 	if !m.Exists(name) {
-		return "", fmt.Errorf("profile [%s] 不存在", name)
+		return "", fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), name)
 	}
 
 	instDir := m.InstanceDir(name)
 	err := os.MkdirAll(instDir, 0755)
 	if err != nil {
-		return "", fmt.Errorf("创建实例目录失败: %w", err)
+		return "", fmt.Errorf(i18n.T("failed to create instance directory: %w", "创建实例目录失败: %w"), err)
 	}
 
 	var claudeDir string
@@ -254,7 +255,7 @@ func (m *Manager) PrepareInstance(name string) (string, error) {
 			if os.IsNotExist(err) {
 				continue
 			}
-			return "", fmt.Errorf("复制认证文件 %s 失败: %w", entry, err)
+			return "", fmt.Errorf(i18n.T("failed to copy auth file %s: %w", "复制认证文件 %s 失败: %w"), entry, err)
 		}
 	}
 
@@ -266,7 +267,7 @@ func (m *Manager) PrepareInstance(name string) (string, error) {
 			if os.IsNotExist(err) {
 				continue
 			}
-			return "", fmt.Errorf("同步配置 %s 失败: %w", entry, err)
+			return "", fmt.Errorf(i18n.T("failed to sync config %s: %w", "同步配置 %s 失败: %w"), entry, err)
 		}
 	}
 
