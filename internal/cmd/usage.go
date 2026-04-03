@@ -170,8 +170,7 @@ func printWindow(name string, w *usageWindow) {
 		return
 	}
 
-	pct := w.Utilization * 100
-	fmt.Printf("    %-14s %6.1f%%", name+":", pct)
+	fmt.Printf("    %-14s %6.1f%%", name+":", w.Utilization)
 
 	if w.ResetsAt != nil {
 		t, err := time.Parse(time.RFC3339, *w.ResetsAt)
