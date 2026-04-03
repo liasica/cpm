@@ -1,5 +1,5 @@
 APP_NAME := cpm
-VERSION  := $(shell git log -1 --format='%cd-%h' --date=format:'%Y%m%d' 2>/dev/null || echo "dev")
+VERSION  := $(shell git log -1 --format='%cd-%h' --date=format:'%Y.%m.%d' 2>/dev/null || echo "dev")
 LDFLAGS  := -s -w -X main.version=$(VERSION)
 
 .PHONY: build install clean test lint

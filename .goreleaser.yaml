@@ -13,7 +13,7 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X main.version={{ .Date }}-{{ .ShortCommit }}
+      - -s -w -X main.version={{ time "2006.01.02" }}-{{ .ShortCommit }}
 
 archives:
   - format: tar.gz
