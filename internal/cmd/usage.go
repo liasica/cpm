@@ -165,12 +165,27 @@ func printUsage(u *usageResponse) {
 	}
 }
 
+const barWidth = 20
+
 func printWindow(name string, w *usageWindow) {
 	if w == nil {
 		return
 	}
 
-	fmt.Printf("    %-14s %6.1f%%", name+":", w.Utilization)
+	// 颜色：绿 < 50%，黄 50-80%，红 >= 80%
+	color := "\033[32m" // 绿
+	if w.Utilization >= 80 {
+		color = "\033[31m" // 红
+	} else if w.Utilization >= 50 {
+		color = "\033[33m" // 黄
+	}
+	reset := "\033[0m"
+
+	// 进度条
+	filled := min(int(w.Utilization/100*barWidth), barWidth)
+	bar := fmt.Sprintf("%s%s%s%s", color, strings.Repeat("█", filled), reset, strings.Repeat("░", barWidth-filled))
+
+	fmt.Printf("    %-14s %s %s%5.1f%%%s", name+":", bar, color, w.Utilization, reset)
 
 	if w.ResetsAt != nil {
 		t, err := time.Parse(time.RFC3339, *w.ResetsAt)
