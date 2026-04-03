@@ -1,6 +1,6 @@
 package claude
 
-// 需要按 profile 切换的认证相关条目
+// Auth-related entries that are switched per profile
 var authEntries = []string{
 	"Cookies",
 	"Cookies-journal",
@@ -8,18 +8,18 @@ var authEntries = []string{
 	"Session Storage",
 }
 
-// 需要同步到独立实例的共享配置
+// Shared configs synced to standalone instances
 var sharedConfigs = []string{
 	"claude_desktop_config.json",
 	"config.json",
 }
 
-// AuthEntries 返回需要切换的认证条目列表
+// AuthEntries returns the list of auth entries to switch
 func AuthEntries() []string {
 	return authEntries
 }
 
-// SharedConfigs 返回需要同步到独立实例的共享配置列表
+// SharedConfigs returns the list of configs to sync to standalone instances
 func SharedConfigs() []string {
 	return sharedConfigs
 }

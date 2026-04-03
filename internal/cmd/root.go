@@ -47,12 +47,12 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// SetVersion 设置版本号
+// SetVersion sets the version string displayed by --version
 func SetVersion(v string) {
 	rootCmd.Version = v
 }
 
-// Execute 执行根命令
+// Execute runs the root command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

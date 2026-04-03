@@ -13,19 +13,19 @@ import (
 	"github.com/liasica/cpm/internal/i18n"
 )
 
-// State 持久化当前活跃的 profile 信息
+// State persists the currently active profile
 type State struct {
 	Current string `json:"current"`
 }
 
-// Manager 负责 profile 的增删改查和切换
+// Manager handles profile CRUD and switching
 type Manager struct {
 	baseDir   string
 	stateFile string
 	state     State
 }
 
-// NewManager 初始化并返回 Manager
+// NewManager initializes and returns a Manager
 func NewManager() (*Manager, error) {
 	baseDir, err := configDir()
 	if err != nil {
@@ -65,28 +65,28 @@ func (m *Manager) profileDir(name string) string {
 	return filepath.Join(m.baseDir, "profiles", name)
 }
 
-// BaseDir 返回 cpm 配置根目录
+// BaseDir returns the cpm config root directory
 func (m *Manager) BaseDir() string {
 	return m.baseDir
 }
 
-// ProfileDir 返回指定 profile 的存储目录
+// ProfileDir returns the storage directory for the given profile
 func (m *Manager) ProfileDir(name string) string {
 	return m.profileDir(name)
 }
 
-// Current 返回当前 profile 名称
+// Current returns the name of the active profile
 func (m *Manager) Current() string {
 	return m.state.Current
 }
 
-// Exists 判断 profile 是否存在
+// Exists checks whether a profile exists
 func (m *Manager) Exists(name string) bool {
 	_, err := os.Stat(m.profileDir(name))
 	return err == nil
 }
 
-// List 返回所有 profile 名称（按字母排序）
+// List returns all profile names sorted alphabetically
 func (m *Manager) List() ([]string, error) {
 	entries, err := os.ReadDir(filepath.Join(m.baseDir, "profiles"))
 	if err != nil {
@@ -107,7 +107,7 @@ func (m *Manager) List() ([]string, error) {
 	return names, nil
 }
 
-// Add 将当前 Claude 的认证数据保存为指定 profile
+// Add saves the current Claude auth data as the named profile
 func (m *Manager) Add(name string) error {
 	if m.Exists(name) {
 		return fmt.Errorf(i18n.T("profile [%s] already exists", "profile [%s] 已存在"), name)
@@ -140,7 +140,7 @@ func (m *Manager) Add(name string) error {
 	return m.saveState()
 }
 
-// Switch 切换到指定 profile
+// Switch switches to the named profile
 func (m *Manager) Switch(name string) error {
 	if !m.Exists(name) {
 		return fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), name)
@@ -155,7 +155,7 @@ func (m *Manager) Switch(name string) error {
 		return err
 	}
 
-	// 将当前认证数据回写到当前 profile
+	// Save current auth data back to the active profile
 	if m.state.Current != "" && m.Exists(m.state.Current) {
 		currentDir := m.profileDir(m.state.Current)
 		for _, entry := range claude.AuthEntries() {
@@ -165,7 +165,7 @@ func (m *Manager) Switch(name string) error {
 		}
 	}
 
-	// 从目标 profile 恢复认证数据
+	// Restore auth data from the target profile
 	targetDir := m.profileDir(name)
 	for _, entry := range claude.AuthEntries() {
 		src := filepath.Join(targetDir, entry)
@@ -186,7 +186,7 @@ func (m *Manager) Switch(name string) error {
 	return m.saveState()
 }
 
-// Remove 删除指定 profile
+// Remove deletes the named profile
 func (m *Manager) Remove(name string) error {
 	if !m.Exists(name) {
 		return fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), name)
@@ -200,7 +200,7 @@ func (m *Manager) Remove(name string) error {
 	return os.RemoveAll(m.profileDir(name))
 }
 
-// Rename 重命名 profile
+// Rename renames a profile
 func (m *Manager) Rename(oldName, newName string) error {
 	if !m.Exists(oldName) {
 		return fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), oldName)
@@ -222,12 +222,12 @@ func (m *Manager) Rename(oldName, newName string) error {
 	return nil
 }
 
-// InstanceDir 返回指定 profile 的独立实例数据目录
+// InstanceDir returns the standalone instance data directory for a profile
 func (m *Manager) InstanceDir(name string) string {
 	return filepath.Join(m.baseDir, "instances", name)
 }
 
-// PrepareInstance 为指定 profile 准备独立实例目录（复制认证文件 + 同步共享配置）
+// PrepareInstance sets up the instance directory (copies auth files + syncs shared configs)
 func (m *Manager) PrepareInstance(name string) (string, error) {
 	if !m.Exists(name) {
 		return "", fmt.Errorf(i18n.T("profile [%s] does not exist", "profile [%s] 不存在"), name)
@@ -247,7 +247,7 @@ func (m *Manager) PrepareInstance(name string) (string, error) {
 
 	profDir := m.profileDir(name)
 
-	// 复制认证文件
+	// Copy auth files
 	for _, entry := range claude.AuthEntries() {
 		src := filepath.Join(profDir, entry)
 		dst := filepath.Join(instDir, entry)
@@ -259,7 +259,7 @@ func (m *Manager) PrepareInstance(name string) (string, error) {
 		}
 	}
 
-	// 同步共享配置
+	// Sync shared configs
 	for _, entry := range claude.SharedConfigs() {
 		src := filepath.Join(claudeDir, entry)
 		dst := filepath.Join(instDir, entry)
@@ -274,7 +274,7 @@ func (m *Manager) PrepareInstance(name string) (string, error) {
 	return instDir, nil
 }
 
-// copyEntry 复制文件或目录
+// copyEntry copies a file or directory
 func copyEntry(src, dst string) error {
 	info, err := os.Stat(src)
 	if err != nil {
@@ -338,16 +338,16 @@ func copyDir(src, dst string) error {
 	return nil
 }
 
-// configDir 返回 cpm 配置目录（跨平台）
+// configDir returns the cpm config directory (cross-platform)
 func configDir() (string, error) {
-	// Windows 使用 %APPDATA%\cpm
+	// Windows uses %APPDATA%\cpm
 	if runtime.GOOS == "windows" {
 		if appData := os.Getenv("APPDATA"); appData != "" {
 			return filepath.Join(appData, "cpm"), nil
 		}
 	}
 
-	// macOS / Linux 使用 ~/.config/cpm
+	// macOS / Linux uses ~/.config/cpm
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("failed to get user home dir: %w", err)

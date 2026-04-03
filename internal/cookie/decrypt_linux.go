@@ -60,7 +60,7 @@ func decrypt(encrypted []byte) (string, error) {
 
 func getEncryptionKey() ([]byte, error) {
 	encKeyOnce.Do(func() {
-		// 尝试从 GNOME Keyring 获取
+		// Try GNOME Keyring first
 		out, err := exec.Command("secret-tool", "lookup", "application", "claude").Output()
 		if err == nil && len(out) > 0 {
 			password := strings.TrimSpace(string(out))
@@ -68,7 +68,7 @@ func getEncryptionKey() ([]byte, error) {
 			return
 		}
 
-		// 回退到 Chromium 默认密码
+		// Fall back to Chromium default password
 		encKey = pbkdf2.Key([]byte("peanuts"), []byte("saltysalt"), 1, 16, sha1.New)
 	})
 

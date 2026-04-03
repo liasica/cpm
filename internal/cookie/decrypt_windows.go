@@ -41,7 +41,7 @@ func decrypt(encrypted []byte) (string, error) {
 		return string(encrypted), nil
 	}
 
-	// Windows Chromium v80+ 使用 AES-256-GCM
+	// Windows Chromium v80+ uses AES-256-GCM
 	key, err := getAESKey()
 	if err != nil {
 		return "", err
@@ -52,7 +52,7 @@ func decrypt(encrypted []byte) (string, error) {
 		return "", fmt.Errorf("ciphertext too short")
 	}
 
-	// 前 12 字节是 nonce，最后 16 字节是 auth tag（包含在 ciphertext 中）
+	// First 12 bytes are the nonce; the rest is ciphertext + 16-byte auth tag
 	nonce := ciphertext[:12]
 	ciphertext = ciphertext[12:]
 
@@ -74,7 +74,7 @@ func decrypt(encrypted []byte) (string, error) {
 	return string(plaintext), nil
 }
 
-// getAESKey 从 Local State 文件获取 DPAPI 加密的 AES 密钥
+// getAESKey reads the DPAPI-encrypted AES key from the Local State file
 func getAESKey() ([]byte, error) {
 	aesKeyOnce.Do(func() {
 		appData := os.Getenv("APPDATA")
@@ -106,7 +106,7 @@ func getAESKey() ([]byte, error) {
 			return
 		}
 
-		// 去掉 "DPAPI" 前缀 (5 bytes)
+		// Strip "DPAPI" prefix (5 bytes)
 		if len(keyBytes) < 5 || string(keyBytes[:5]) != "DPAPI" {
 			aesKeyErr = fmt.Errorf("unexpected key format")
 			return

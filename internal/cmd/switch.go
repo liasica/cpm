@@ -28,7 +28,7 @@ var switchCmd = &cobra.Command{
 
 		wasRunning := claude.IsRunning()
 
-		// 切换前关闭 Claude，确保文件不被占用
+		// Close Claude before switching to avoid file lock conflicts
 		if wasRunning {
 			fmt.Print(i18n.T("Closing Claude...", "正在关闭 Claude..."))
 			if err = claude.Quit(); err != nil {
@@ -45,7 +45,7 @@ var switchCmd = &cobra.Command{
 
 		fmt.Printf(i18n.T("Switched to profile [%s]\n", "已切换到 profile [%s]\n"), name)
 
-		// 如果之前在运行且未禁用重启，则自动启动
+		// Relaunch if it was running and restart is not disabled
 		if wasRunning && !noRestart {
 			fmt.Print(i18n.T("Starting Claude...", "正在启动 Claude..."))
 			if err = claude.Launch(); err != nil {

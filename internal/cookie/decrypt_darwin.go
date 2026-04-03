@@ -23,7 +23,7 @@ func decrypt(encrypted []byte) (string, error) {
 		return "", fmt.Errorf("encrypted value too short")
 	}
 
-	// 非加密值直接返回
+	// Return unencrypted values as-is
 	prefix := string(encrypted[:3])
 	if prefix != "v10" && prefix != "v11" {
 		return string(encrypted), nil
@@ -36,7 +36,7 @@ func decrypt(encrypted []byte) (string, error) {
 
 	ciphertext := encrypted[3:]
 
-	// 新版 Electron/Chromium 格式：32 字节头部（后 16 字节为 IV）+ 密文
+	// Newer Electron/Chromium format: 32-byte header (last 16 bytes = IV) + ciphertext
 	if len(ciphertext) > 32 {
 		ct := ciphertext[32:]
 		if len(ct) >= aes.BlockSize && len(ct)%aes.BlockSize == 0 {
@@ -47,7 +47,7 @@ func decrypt(encrypted []byte) (string, error) {
 		}
 	}
 
-	// 传统格式：16 字节空格 IV + 密文
+	// Legacy format: 16-byte space IV + ciphertext
 	if len(ciphertext) >= aes.BlockSize && len(ciphertext)%aes.BlockSize == 0 {
 		iv := make([]byte, aes.BlockSize)
 		for i := range iv {
@@ -68,7 +68,7 @@ func decryptCBC(key, iv, ciphertext []byte) (string, error) {
 	plaintext := make([]byte, len(ciphertext))
 	cipher.NewCBCDecrypter(block, iv).CryptBlocks(plaintext, ciphertext)
 
-	// PKCS#7 去填充
+	// PKCS#7 unpadding
 	if padding := int(plaintext[len(plaintext)-1]); padding > 0 && padding <= aes.BlockSize {
 		plaintext = plaintext[:len(plaintext)-padding]
 	}

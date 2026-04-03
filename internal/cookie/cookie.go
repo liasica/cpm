@@ -10,7 +10,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// ReadFromProfile 从指定 profile 目录的 Cookies 数据库读取 claude.ai 的 cookies
+// ReadFromProfile reads claude.ai cookies from the Cookies database in a profile directory
 func ReadFromProfile(profileDir string) ([]*http.Cookie, error) {
 	dbPath := filepath.Join(profileDir, "Cookies")
 	if _, err := os.Stat(dbPath); err != nil {
@@ -20,13 +20,13 @@ func ReadFromProfile(profileDir string) ([]*http.Cookie, error) {
 	return readFromDB(dbPath)
 }
 
-// ReadFromClaudeDir 从 Claude 应用数据目录读取 cookies
+// ReadFromClaudeDir reads cookies from the Claude application data directory
 func ReadFromClaudeDir(claudeDir string) ([]*http.Cookie, error) {
 	return readFromDB(filepath.Join(claudeDir, "Cookies"))
 }
 
 func readFromDB(dbPath string) ([]*http.Cookie, error) {
-	// 使用临时副本避免锁冲突
+	// Copy to temp file to avoid lock conflicts
 	tmp, err := copyToTemp(dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy cookies database: %w", err)
@@ -58,7 +58,7 @@ func readFromDB(dbPath string) ([]*http.Cookie, error) {
 			continue
 		}
 
-		// 解密加密的 cookie 值
+		// Decrypt encrypted cookie value
 		if len(encValue) > 0 {
 			var decrypted string
 			decrypted, err = decrypt(encValue)
@@ -72,7 +72,7 @@ func readFromDB(dbPath string) ([]*http.Cookie, error) {
 			continue
 		}
 
-		// 过滤含有非法 HTTP header 字符的 cookie
+		// Filter out cookies with invalid HTTP header characters
 		if !isValidCookieValue(value) {
 			continue
 		}
@@ -90,7 +90,7 @@ func readFromDB(dbPath string) ([]*http.Cookie, error) {
 	return cookies, nil
 }
 
-// isValidCookieValue 检查 cookie 值是否只包含合法的 HTTP header 字符
+// isValidCookieValue checks that a cookie value only contains valid HTTP header characters
 func isValidCookieValue(v string) bool {
 	for _, c := range v {
 		if c < 0x20 || c == 0x7f {
@@ -109,7 +109,7 @@ func copyToTemp(src string) (string, error) {
 	dbName := filepath.Base(src)
 	tmpDB := filepath.Join(tmpDir, dbName)
 
-	// 复制主数据库文件
+	// Copy main database file
 	data, err := os.ReadFile(src)
 	if err != nil {
 		os.RemoveAll(tmpDir)
@@ -120,7 +120,7 @@ func copyToTemp(src string) (string, error) {
 		return "", err
 	}
 
-	// 复制 WAL 和 SHM 文件（Chromium 使用 WAL 模式，数据可能在 WAL 中）
+	// Copy WAL and SHM files if present (Chromium uses WAL mode)
 	for _, suffix := range []string{"-wal", "-shm"} {
 		if walData, rdErr := os.ReadFile(src + suffix); rdErr == nil {
 			_ = os.WriteFile(tmpDB+suffix, walData, 0600)

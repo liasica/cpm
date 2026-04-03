@@ -14,7 +14,7 @@ const (
 	exeName = "Claude.exe"
 )
 
-// DataDir 返回 Claude 应用数据目录
+// DataDir returns the Claude application data directory
 func DataDir() (string, error) {
 	if appData := os.Getenv("APPDATA"); appData != "" {
 		return filepath.Join(appData, "Claude"), nil
@@ -28,7 +28,7 @@ func DataDir() (string, error) {
 	return filepath.Join(home, "AppData", "Roaming", "Claude"), nil
 }
 
-// IsRunning 检查 Claude 是否正在运行
+// IsRunning checks whether Claude is currently running
 func IsRunning() bool {
 	out, err := exec.Command("tasklist", "/FI", "IMAGENAME eq "+exeName, "/NH").Output()
 	if err != nil {
@@ -38,7 +38,7 @@ func IsRunning() bool {
 	return strings.Contains(string(out), exeName)
 }
 
-// Quit 关闭 Claude 应用
+// Quit gracefully closes the Claude app
 func Quit() error {
 	if !IsRunning() {
 		return nil
@@ -53,7 +53,7 @@ func Quit() error {
 		time.Sleep(200 * time.Millisecond)
 	}
 
-	// 超时后强制终止
+	// Force kill on timeout
 	_ = exec.Command("taskkill", "/F", "/IM", exeName).Run()
 	time.Sleep(500 * time.Millisecond)
 
@@ -64,7 +64,7 @@ func Quit() error {
 	return nil
 }
 
-// findExe 查找 Claude 可执行文件路径
+// findExe locates the Claude executable path
 func findExe() (string, error) {
 	candidates := []string{
 		filepath.Join(os.Getenv("LOCALAPPDATA"), "Programs", "claude-desktop", exeName),
@@ -79,7 +79,7 @@ func findExe() (string, error) {
 		}
 	}
 
-	// 回退到 PATH 查找
+	// Fall back to PATH lookup
 	p, err := exec.LookPath(exeName)
 	if err == nil {
 		return p, nil
@@ -88,7 +88,7 @@ func findExe() (string, error) {
 	return "", fmt.Errorf("Claude executable not found")
 }
 
-// Launch 启动 Claude 应用
+// Launch starts the Claude app
 func Launch() error {
 	exePath, err := findExe()
 	if err != nil {
@@ -102,7 +102,7 @@ func Launch() error {
 	return cmd.Start()
 }
 
-// LaunchWithDataDir 以独立数据目录启动新的 Claude 实例
+// LaunchWithDataDir launches a new Claude instance with an isolated data directory
 func LaunchWithDataDir(dataDir string) error {
 	exePath, err := findExe()
 	if err != nil {
@@ -116,7 +116,7 @@ func LaunchWithDataDir(dataDir string) error {
 	return cmd.Start()
 }
 
-// IsInstanceRunning 检查指定数据目录的 Claude 实例是否在运行
+// IsInstanceRunning checks whether a Claude instance with the given data directory is running
 func IsInstanceRunning(dataDir string) bool {
 	script := fmt.Sprintf(
 		`Get-CimInstance Win32_Process -Filter "Name='%s'" | Where-Object { $_.CommandLine -like '*user-data-dir=%s*' } | Select-Object -First 1 ProcessId`,
@@ -130,7 +130,7 @@ func IsInstanceRunning(dataDir string) bool {
 	return strings.TrimSpace(string(out)) != ""
 }
 
-// CloseInstance 关闭指定数据目录的 Claude 实例
+// CloseInstance closes the Claude instance with the given data directory
 func CloseInstance(dataDir string) error {
 	if !IsInstanceRunning(dataDir) {
 		return nil

@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Claude API 响应结构
+// Claude API response types
 type organization struct {
 	UUID          string   `json:"uuid"`
 	Name          string   `json:"name"`
@@ -63,7 +63,7 @@ var usageCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// 如果没有 profile，尝试读取当前 Claude 数据目录
+		// No profiles found, try reading from the current Claude data directory
 		if len(names) == 0 {
 			fmt.Println("No profiles found, checking current Claude session...")
 			var claudeDir string
@@ -85,7 +85,7 @@ var usageCmd = &cobra.Command{
 
 			profDir := pm.ProfileDir(name)
 
-			// 当前 profile 使用 Claude 数据目录中的最新 cookies
+			// Active profile reads cookies from the Claude data directory
 			if name == current {
 				var claudeDir string
 				claudeDir, err = claude.DataDir()
@@ -114,7 +114,7 @@ func printUsageForDir(label, dir string) {
 		return
 	}
 
-	// 获取组织信息
+	// Fetch organizations
 	orgs, err := fetchOrganizations(cookies)
 	if err != nil {
 		fmt.Printf("  Failed to fetch organizations: %v\n", err)
@@ -133,7 +133,7 @@ func printUsageForDir(label, dir string) {
 		}
 		fmt.Println()
 
-		// 获取用量信息
+		// Fetch usage info
 		usage, err := fetchUsage(cookies, org.UUID)
 		if err != nil {
 			fmt.Printf("    Usage: failed to fetch (%v)\n", err)
@@ -172,16 +172,16 @@ func printWindow(name string, w *usageWindow) {
 		return
 	}
 
-	// 颜色：绿 < 50%，黄 50-80%，红 >= 80%
-	color := "\033[32m" // 绿
+	// Color: green < 50%, yellow 50-80%, red >= 80%
+	color := "\033[32m"
 	if w.Utilization >= 80 {
-		color = "\033[31m" // 红
+		color = "\033[31m"
 	} else if w.Utilization >= 50 {
-		color = "\033[33m" // 黄
+		color = "\033[33m"
 	}
 	reset := "\033[0m"
 
-	// 进度条
+	// Progress bar
 	filled := min(int(w.Utilization/100*barWidth), barWidth)
 	bar := fmt.Sprintf("%s%s%s%s", color, strings.Repeat("█", filled), reset, strings.Repeat("░", barWidth-filled))
 
@@ -195,7 +195,7 @@ func printWindow(name string, w *usageWindow) {
 			if remaining > 0 {
 				local := t.Local()
 				zone, _ := local.Zone()
-				fmt.Printf("  ⏳ %s %s(%s %s)%s", formatDuration(remaining), dim, local.Format("01/02 15:04"), zone, reset)
+				fmt.Printf("  ⏳ %s %s %s(%s)%s", local.Format("01/02 15:04"), zone, dim, formatDuration(remaining), reset)
 			} else {
 				fmt.Printf("  ✅ %sready%s", "\033[32m", reset)
 			}
@@ -258,7 +258,7 @@ func apiGet(url string, cookies []*http.Cookie) ([]byte, error) {
 		return nil, err
 	}
 
-	// 手动构建 Cookie header 避免 Go 对特殊字符的校验
+	// Build Cookie header manually to bypass Go's cookie value validation
 	var parts []string
 	for _, c := range cookies {
 		parts = append(parts, c.Name+"="+c.Value)

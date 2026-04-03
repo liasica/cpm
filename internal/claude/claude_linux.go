@@ -11,9 +11,9 @@ import (
 
 const appName = "claude"
 
-// DataDir 返回 Claude 应用数据目录
+// DataDir returns the Claude application data directory
 func DataDir() (string, error) {
-	// 优先使用 XDG_CONFIG_HOME
+	// Prefer XDG_CONFIG_HOME if set
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
 		return filepath.Join(xdg, "Claude"), nil
 	}
@@ -26,7 +26,7 @@ func DataDir() (string, error) {
 	return filepath.Join(home, ".config", "Claude"), nil
 }
 
-// IsRunning 检查 Claude 是否正在运行
+// IsRunning checks whether Claude is currently running
 func IsRunning() bool {
 	out, err := exec.Command("pgrep", "-x", appName).Output()
 	if err != nil {
@@ -36,7 +36,7 @@ func IsRunning() bool {
 	return strings.TrimSpace(string(out)) != ""
 }
 
-// Quit 关闭 Claude 应用
+// Quit gracefully closes the Claude app
 func Quit() error {
 	if !IsRunning() {
 		return nil
@@ -51,7 +51,7 @@ func Quit() error {
 		time.Sleep(200 * time.Millisecond)
 	}
 
-	// 超时后强制终止
+	// Force kill on timeout
 	_ = exec.Command("pkill", "-9", "-x", appName).Run()
 	time.Sleep(500 * time.Millisecond)
 
@@ -62,7 +62,7 @@ func Quit() error {
 	return nil
 }
 
-// Launch 启动 Claude 应用
+// Launch starts the Claude app
 func Launch() error {
 	cmd := exec.Command(appName)
 	cmd.Stdout = nil
@@ -71,7 +71,7 @@ func Launch() error {
 	return cmd.Start()
 }
 
-// LaunchWithDataDir 以独立数据目录启动新的 Claude 实例
+// LaunchWithDataDir launches a new Claude instance with an isolated data directory
 func LaunchWithDataDir(dataDir string) error {
 	cmd := exec.Command(appName, "--user-data-dir="+dataDir)
 	cmd.Stdout = nil
@@ -80,7 +80,7 @@ func LaunchWithDataDir(dataDir string) error {
 	return cmd.Start()
 }
 
-// IsInstanceRunning 检查指定数据目录的 Claude 实例是否在运行
+// IsInstanceRunning checks whether a Claude instance with the given data directory is running
 func IsInstanceRunning(dataDir string) bool {
 	out, err := exec.Command("pgrep", "-f", "user-data-dir="+dataDir).Output()
 	if err != nil {
@@ -90,7 +90,7 @@ func IsInstanceRunning(dataDir string) bool {
 	return strings.TrimSpace(string(out)) != ""
 }
 
-// CloseInstance 关闭指定数据目录的 Claude 实例
+// CloseInstance closes the Claude instance with the given data directory
 func CloseInstance(dataDir string) error {
 	if !IsInstanceRunning(dataDir) {
 		return nil
